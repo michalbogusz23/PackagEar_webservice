@@ -12,7 +12,6 @@ JWT_SECRET = getenv("JWT_SECRET")
 def before_request_func():
     token = request.headers.get('Authorization','').replace('Bearer ', '')
     print(token, file=sys.stderr)
-    print(type(JWT_SECRET), file=sys.stderr)
     try:
         g.authorization = decode(token, JWT_SECRET, algorithms=['HS256'])
         print('Authorized: ' + str(g.authorization), file=sys.stderr)
@@ -26,7 +25,7 @@ def root():
 
 @app.route('/package', methods=['GET'])
 def get_packages():
-    if not g.autorization.get('usr'):
+    if not g.authorization.get('usr'):
         return {'error': 'Unauthorized'}, 401
     packages = db_handler.get_packages()
     return packages
