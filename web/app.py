@@ -39,10 +39,10 @@ def get_packages():
         item = json.loads(package)
         items.append(item)
 
-    links = []
+    # links = []
     data = {'items': items}
-    document = Document(data=data, links=links)
-    return document
+    # document = Document(data=data, links=links)
+    return data
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5050, debug=True)
