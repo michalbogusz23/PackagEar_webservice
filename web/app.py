@@ -29,6 +29,7 @@ def get_packages():
     if not username:
         return {'error': 'Unauthorized'}, 401
     packages = db_handler.get_packages(username)
+    print(packages, file=sys.stderr)
     return packages
 
 if __name__ == "__main__":
