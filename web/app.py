@@ -25,9 +25,10 @@ def root():
 
 @app.route('/package', methods=['GET'])
 def get_packages():
-    if not g.authorization.get('usr'):
+    username = g.authorization.get('usr')
+    if not username:
         return {'error': 'Unauthorized'}, 401
-    packages = db_handler.get_packages()
+    packages = db_handler.get_packages(username)
     return packages
 
 if __name__ == "__main__":

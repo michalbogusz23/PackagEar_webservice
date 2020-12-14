@@ -1,4 +1,3 @@
-from flask import session
 import uuid
 from dotenv import load_dotenv
 from os import getenv
@@ -13,19 +12,16 @@ db = StrictRedis(REDIS_HOST, db=REDIS_INSTANCE, password=REDIS_PASS)
 def is_user(login):
     return db.hexists(f"user:{login}", "password")
 
-def save_package(package):
+def save_package(package, login):
     package_id = str(uuid.uuid4())
-
-    login = session["user"]
 
     db.hmset(f"package:{login}:{package_id}", package)
 
     return True
     
-def get_packages():
+def get_packages(login):
     packages = []
 
-    login = session["user"]
     keys = db.keys(pattern=f"package:{login}*")
      
     for key in keys:
@@ -36,8 +32,7 @@ def get_packages():
 
     return packages
 
-def delete_package_from_db(id):
-    login = session["user"]
+def delete_package_from_db(id, login):
     key = f"package:{login}:{id}"
 
     db.delete(key)
