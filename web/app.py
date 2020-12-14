@@ -1,10 +1,15 @@
 from flask import Flask, g, request
+from flask_hal import HAL
+from flask_hal.document import Document, Embedded
+from flask_hal.link import Link
 from os import getenv
 from jwt import decode
 import sys
 import db_handler
+import json
 
 app = Flask(__name__)
+HAL(app)
 
 JWT_SECRET = getenv("JWT_SECRET")
 
@@ -34,7 +39,10 @@ def get_packages():
         item = json.loads(package)
         items.append(item)
 
-    return items
+    links = []
+    data = {'items': items}
+    document = Document(data=data, links=links)
+    return document
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5050, debug=True)
