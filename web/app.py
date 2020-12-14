@@ -2,6 +2,7 @@ from flask import Flask, g, request
 from os import getenv
 from jwt import decode
 import sys
+import db_handler
 
 app = Flask(__name__)
 
@@ -9,8 +10,9 @@ JWT_SECRET = getenv("JWT_SECRET")
 
 @app.before_request
 def before_request_func():
-    print(JWT_SECRET, file=sys.stderr)
-    token = request.headers.get('Authorization','').replace('Bearer', '')
+    token = request.headers.get('Authorization','').replace('Bearer ', '')
+    print(token, file=sys.stderr)
+    print(type(JWT_SECRET), file=sys.stderr)
     try:
         g.authorization = decode(token, JWT_SECRET, algorithms=['HS256'])
         print('Authorized: ' + str(g.authorization), file=sys.stderr)
@@ -20,8 +22,14 @@ def before_request_func():
 
 @app.route('/', methods=['GET'])
 def root():
-    print('asd', file=sys.stderr)
     return 'Hello world'
 
+@app.route('/package', methods=['GET'])
+def get_packages():
+    if not g.autorization.get('usr'):
+        return {'error': 'Unauthorized'}, 401
+    packages = db_handler.get_packages()
+    return packages
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5050, debug=True)
