@@ -40,9 +40,31 @@ def get_packages():
     #     items.append(item)
 
     # links = []
-    # data = {'items': items}
+    data = {'packages': packages}
     # document = Document(data=data, links=links)
-    return json.dumps(packages)
+    return json.dumps(data)
+
+@app.route("/package", methods=["POST"])
+def add_package():
+    username = g.authorization.get('usr')
+    if not username:
+        return {'error': 'Unauthorized'}, 401
+
+    package = {}
+    data = request.form
+    fields = ("receiver_name", "box_id", "size")
+
+    if data["size"] not in ["s", "m", "l"]:
+        return 'Niewłaściwy rozmiar paczki', 401
+
+    for field in fields:
+        package[field] = data[field]
+
+    if db_handler.save_package(package):
+        flash(f"Pomyślnie dodano paczkę")
+        return redirect(url_for("sender_dashboard"))
+    else:
+        return "Database not working", 507
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5050, debug=True)
