@@ -34,15 +34,15 @@ def get_packages():
     if not username:
         return {'error': 'Unauthorized'}, 401
     packages = db_handler.get_packages(username)
-    items = []
-    for package in packages:
-        item = json.loads(package)
-        items.append(item)
+    # items = []
+    # for package in packages:
+    #     item = json.loads(package)
+    #     items.append(item)
 
     # links = []
     # data = {'items': items}
     # document = Document(data=data, links=links)
-    return items
+    return json.dumps(packages)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5050, debug=True)
