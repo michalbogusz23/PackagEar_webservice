@@ -28,42 +28,37 @@ def before_request_func():
 def root():
     return 'Hello world'
 
-@app.route('/package', methods=['GET'])
-def get_packages():
+@app.route('/label', methods=['GET'])
+def get_labels():
     username = g.authorization.get('usr')
     if not username:
         return {'error': 'Unauthorized'}, 401
-    packages = db_handler.get_packages(username)
-    # items = []
-    # for package in packages:
-    #     item = json.loads(package)
-    #     items.append(item)
+    labels = db_handler.get_user_labels(username)
 
-    # links = []
-    data = {'packages': packages}
-    # document = Document(data=data, links=links)
+    data = {'labels': labels}
+
     return json.dumps(data)
 
-@app.route("/package", methods=["POST"])
-def add_package():
+@app.route("/label", methods=["POST"])
+def add_label():
     username = g.authorization.get('usr')
     if not username:
         return {'error': 'Unauthorized'}, 401
 
-    package = request.json
-    print(package, file=sys.stderr)
-    if db_handler.save_package(package, username):
+    label = request.json
+    print(label, file=sys.stderr)
+    if db_handler.save_label(label, username):
         return {'status': 'ok'}, 200
     else:
         return "Database not working", 507
 
-@app.route("/package/<id>", methods=['DELETE'])
-def delete_package(id):
+@app.route("/label/<id>", methods=['DELETE'])
+def delete_label(id):
     username = g.authorization.get('usr')
     if not username:
         return {'error': 'Unauthorized'}, 401
 
-    db_handler.delete_package_from_db(id, username)
+    db_handler.delete_label_from_db(id, username)
 
     return {'status': 'ok'}, 200
 

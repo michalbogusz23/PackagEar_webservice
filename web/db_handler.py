@@ -12,28 +12,41 @@ db = StrictRedis(REDIS_HOST, db=REDIS_INSTANCE, password=REDIS_PASS)
 def is_user(login):
     return db.hexists(f"user:{login}", "password")
 
-def save_package(package, login):
-    package_id = str(uuid.uuid4())
+def save_label(label, login):
+    label_id = str(uuid.uuid4())
 
-    db.hmset(f"package:{login}:{package_id}", package)
+    db.hmset(f"label:{login}:{label_id}", label)
 
     return True
     
-def get_packages(login):
-    packages = []
+def get_user_labels(login):
+    labels = []
 
-    keys = db.keys(pattern=f"package:{login}*")
+    keys = db.keys(pattern=f"label:{login}*")
      
     for key in keys:
-        package = db.hgetall(key)
-        package = decode_redis(package)
-        package["id"] = key.decode().split(":")[2]
-        packages.append(package)
+        label = db.hgetall(key)
+        label = decode_redis(label)
+        label["id"] = key.decode().split(":")[2]
+        labels.append(label)
 
-    return packages
+    return labels
 
-def delete_package_from_db(id, login):
-    key = f"package:{login}:{id}"
+def get_all_labels():
+    labels = []
+
+    keys = db.keys(pattern="label:*")
+     
+    for key in keys:
+        label = db.hgetall(key)
+        label = decode_redis(label)
+        label["id"] = key.decode().split(":")[2]
+        labels.append(label)
+
+    return labels
+
+def delete_label_from_db(id, login):
+    key = f"label:{login}:{id}"
 
     db.delete(key)
 
