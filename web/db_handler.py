@@ -52,6 +52,34 @@ def delete_label_from_db(id, login):
 
     return True
 
+def save_package(label_id, package):
+    db.hmset(f"package:{label_id}", package)
+
+    return True
+
+def update_package(label_id, package):
+    db.hmset(f"package:{label_id}", package)
+
+    return True
+
+def get_all_packages():
+    packages = []
+
+    keys = db.keys(pattern="package:*")
+     
+    for key in keys:
+        package = db.hgetall(key)
+        package = decode_redis(package)
+        package["id"] = key.decode().split(":")[2]
+        packages.append(package)
+
+    return packages
+    # key = "package:*:*"
+
+    # db.delete(key)
+
+    # return True
+
 def decode_redis(src):
     if isinstance(src, list):
         rv = list()

@@ -33,7 +33,14 @@ def get_labels():
     username = g.authorization.get('usr')
     if not username:
         return {'error': 'Unauthorized'}, 401
-    labels = db_handler.get_user_labels(username)
+
+    who_asks = g.authorization.get('type')
+    if who_asks == 'sender': 
+        labels = db_handler.get_user_labels(username)
+    elif who_asks == 'courier':
+        labels = db_handler.get_all_labels()
+    else: 
+        return {'error': 'Unauthorized'}, 401
 
     data = {'labels': labels}
 
@@ -42,7 +49,8 @@ def get_labels():
 @app.route("/label", methods=["POST"])
 def add_label():
     username = g.authorization.get('usr')
-    if not username:
+    who_asks = g.authorization.get('type')
+    if not username or who_asks != 'sender':
         return {'error': 'Unauthorized'}, 401
 
     label = request.json
@@ -55,12 +63,54 @@ def add_label():
 @app.route("/label/<id>", methods=['DELETE'])
 def delete_label(id):
     username = g.authorization.get('usr')
-    if not username:
+    who_asks = g.authorization.get('type')
+    if not username or who_asks != 'sender':
         return {'error': 'Unauthorized'}, 401
 
     db_handler.delete_label_from_db(id, username)
 
     return {'status': 'ok'}, 200
+
+@app.route("/package", methods=["POST"])
+def add_pacakge():
+    username = g.authorization.get('usr')
+    who_asks = g.authorization.get('type')
+    if not username or who_asks != 'courier':
+        return {'error': 'Unauthorized'}, 401
+
+    package = request.json
+    print(package, file=sys.stderr)
+    if db_handler.save_package(id, package):
+        return {'status': 'ok'}, 200
+    else:
+        return "Database not working", 507
+
+@app.route("/package/<id>", methods=["PUT"])
+def update_package(id):
+    username = g.authorization.get('usr')
+    who_asks = g.authorization.get('type')
+    if not username or who_asks != 'courier':
+        return {'error': 'Unauthorized'}, 401
+
+    package = request.json
+    print(package, file=sys.stderr)
+    if db_handler.save_package(package, username):
+        return {'status': 'ok'}, 200
+    else:
+        return "Database not working", 507
+
+@app.route('/package', methods=['GET'])
+def get_packages():
+    username = g.authorization.get('usr')
+    who_asks = g.authorization.get('type')
+    if not username or who_asks != 'courier':
+        return {'error': 'Unauthorized'}, 401
+    
+    packages = db_handler.get_all_packages()
+
+    data = {'packages': packages}
+
+    return json.dumps(data)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5050, debug=True)
