@@ -40,9 +40,9 @@ def get_packages():
         items.append(item)
 
     # links = []
-    data = {'items': items}
+    # data = {'items': items}
     # document = Document(data=data, links=links)
-    return data
+    return items
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5050, debug=True)
