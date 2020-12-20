@@ -50,19 +50,10 @@ def add_package():
     if not username:
         return {'error': 'Unauthorized'}, 401
 
-    package = {}
-    data = request.form
-    fields = ("receiver_name", "box_id", "size")
-
-    if data["size"] not in ["s", "m", "l"]:
-        return 'Niewłaściwy rozmiar paczki', 401
-
-    for field in fields:
-        package[field] = data[field]
-
-    if db_handler.save_package(package):
-        flash(f"Pomyślnie dodano paczkę")
-        return redirect(url_for("sender_dashboard"))
+    package = request.json
+    print(package, file=sys.stderr)
+    if db_handler.save_package(package, username):
+        return {'status': 'ok'}, 200
     else:
         return "Database not working", 507
 
