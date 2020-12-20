@@ -57,5 +57,15 @@ def add_package():
     else:
         return "Database not working", 507
 
+@app.route("/package/<id>", methods=['DELETE'])
+def delete_package(id):
+    username = g.authorization.get('usr')
+    if not username:
+        return {'error': 'Unauthorized'}, 401
+
+    db_handler.delete_package_from_db(id, username)
+
+    return {'status': 'ok'}, 200
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5050, debug=True)
