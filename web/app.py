@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 import sys
 import db_handler
 import json
-import requests
 
 app = Flask(__name__)
 
@@ -109,16 +108,6 @@ def update_package(id):
         return {'status': 'ok'}, 200
     else:
         return "Database not working", 507
-
-def notify_user(msg):
-    payload = {
-        'usr': 'user',
-        'exp': datetime.utcnow() + timedelta(seconds=JWT_EXP)
-    }
-    token = encode(payload, JWT_SECRET, algorithm='HS256')
-    token = token.decode()
-    headers = {"Authorization": "Bearer " + token}
-    requests.get(API_ADDRESS + 'label', headers=headers)
 
 @app.route('/package', methods=['GET'])
 def get_packages():
