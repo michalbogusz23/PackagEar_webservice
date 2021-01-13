@@ -1,4 +1,5 @@
 import uuid
+import sys
 from dotenv import load_dotenv
 from os import getenv
 from redis import StrictRedis
@@ -41,6 +42,7 @@ def get_all_labels():
         label = db.hgetall(key)
         label = decode_redis(label)
         label["id"] = key.decode().split(":")[2]
+        label["sender"] = key.decode().split(":")[1]
         labels.append(label)
 
     return labels
@@ -52,13 +54,12 @@ def delete_label_from_db(id, login):
 
     return True
 
-def save_package(label_id, package):
-    db.hmset(f"package:{label_id}", package)
-
+def save_package(label_id, status):
+    db.hmset(f"package:{label_id}", status)
     return True
 
-def update_package(label_id, package):
-    db.hmset(f"package:{label_id}", package)
+def update_package(label_id, status):
+    db.hmset(f"package:{label_id}", status)
 
     return True
 
@@ -66,17 +67,20 @@ def get_all_packages():
     packages = []
 
     keys = db.keys(pattern="package:*")
-     
+    
     for key in keys:
         package = db.hgetall(key)
         package = decode_redis(package)
-        package["id"] = key.decode().split(":")[2]
+        print(package, file=sys.stderr)
+        package["id"] = key.decode().split(":")[1]
         packages.append(package)
 
     return packages
-    # key = "package:*:*"
-
-    # db.delete(key)
+    
+    # to_delete = db.keys('package:*')
+    # print(to_delete, file=sys.stderr)
+    # for key in to_delete:
+    #     db.delete(key)
 
     # return True
 

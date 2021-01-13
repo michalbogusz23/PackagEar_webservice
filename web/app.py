@@ -1,17 +1,24 @@
 from flask import Flask, g, request
-from flask_hal import HAL
-from flask_hal.document import Document, Embedded
-from flask_hal.link import Link
 from os import getenv
 from jwt import decode
+from jwt import encode, decode
+from datetime import datetime, timedelta
 import sys
 import db_handler
 import json
+import requests
 
 app = Flask(__name__)
-HAL(app)
+
+try:
+    JWT_EXP = int(getenv('JWT_EXP'))
+except ValueError:
+    JWT_EXP = 120
+except TypeError:
+    JWT_EXP = 120
 
 JWT_SECRET = getenv("JWT_SECRET")
+API_ADDRESS = 'https://secret-island-24073.herokuapp.com/'
 
 @app.before_request
 def before_request_func():
@@ -79,8 +86,10 @@ def add_pacakge():
         return {'error': 'Unauthorized'}, 401
 
     package = request.json
-    print(package, file=sys.stderr)
-    if db_handler.save_package(id, package):
+    label_id = package['label_id']
+    print(label_id, file=sys.stderr)
+    status = {'status': 'registred'}
+    if db_handler.save_package(label_id, status):
         return {'status': 'ok'}, 200
     else:
         return "Database not working", 507
@@ -93,11 +102,23 @@ def update_package(id):
         return {'error': 'Unauthorized'}, 401
 
     package = request.json
-    print(package, file=sys.stderr)
-    if db_handler.save_package(package, username):
+    label_id = package.label_id
+    status = package.status
+    status = {'status': status}
+    if db_handler.save_package(label_id, status):
         return {'status': 'ok'}, 200
     else:
         return "Database not working", 507
+
+def notify_user(msg):
+    payload = {
+        'usr': 'user',
+        'exp': datetime.utcnow() + timedelta(seconds=JWT_EXP)
+    }
+    token = encode(payload, JWT_SECRET, algorithm='HS256')
+    token = token.decode()
+    headers = {"Authorization": "Bearer " + token}
+    requests.get(API_ADDRESS + 'label', headers=headers)
 
 @app.route('/package', methods=['GET'])
 def get_packages():
