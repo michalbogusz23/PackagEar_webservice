@@ -101,8 +101,8 @@ def update_package(id):
         return {'error': 'Unauthorized'}, 401
 
     package = request.json
-    label_id = package.label_id
-    status = package.status
+    label_id = package['label_id']
+    status = package['status']
     status = {'status': status}
     if db_handler.save_package(label_id, status):
         return {'status': 'ok'}, 200
@@ -121,6 +121,31 @@ def get_packages():
     data = {'packages': packages}
 
     return json.dumps(data)
+
+@app.route('/notification', methods=['GET'])
+def get_notifications():
+    username = g.authorization.get('usr')
+    who_asks = g.authorization.get('type')
+    if not username or who_asks != 'sender':
+        return {'error': 'Unauthorized'}, 401
+
+    notification = db_handler.get_notifications(username)
+    msg = {"msg": notification}
+
+    return msg
+
+@app.route('/notification', methods=['POST'])
+def add_notification():
+    username = g.authorization.get('usr')
+    who_asks = g.authorization.get('type')
+    if not username or who_asks != 'courier':
+        return {'error': 'Unauthorized'}, 401
+
+    r = request.json
+    msg = r['msg']
+    login = r['login']
+    db_handler.add_notifications(login, msg)
+    return {'status': 'ok'}, 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5050, debug=True)

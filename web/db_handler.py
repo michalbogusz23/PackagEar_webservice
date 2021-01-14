@@ -99,3 +99,12 @@ def decode_redis(src):
         return src.decode()
     else:
         raise Exception("type not handled: " +type(src))
+
+def get_notifications(login):
+    msg = db.lpop(f"{login}:notifications")
+    if msg:
+        return msg.decode()
+    return msg
+
+def add_notifications(login, msg):
+    return db.lpush(f"{login}:notifications", msg)
